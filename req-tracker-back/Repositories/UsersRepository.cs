@@ -1,30 +1,20 @@
-﻿using Microsoft.EntityFrameworkCore;
-using req_tracker_back.Data;
-using req_tracker_back.Models;
+﻿using req_tracker_back.Keycloak;
+using req_tracker_back.ResponseModels;
 
 namespace req_tracker_back.Repositories
 {
-    public class UsersRepository(RTContext context)
+    public class UsersRepository(KeycloakClient keycloak)
     {
-        private readonly RTContext _context = context;
+        private readonly KeycloakClient _keycloak = keycloak;
 
-        public async Task<User?> GetUser(string login)
+        public async Task<IEnumerable<UserResponse>> GetAll()
         {
-            return await _context.Users
-                .FirstOrDefaultAsync(x => x.Login == login);
+            return await _keycloak.GetUsersAsync();
         }
 
-        public IEnumerable<User> GetAll(string? filter)
+        public async Task<UserResponse> GetUserById(string id)
         {
-            IQueryable<User> query = _context.Users;
-
-            if (filter is not null)
-            {
-                string filterToLower = filter.ToLower();
-                query = query.Where(p => p.Nickname.ToLower().Contains(filterToLower));
-            }
-
-            return query.ToList();
+            return await _keycloak.GetUserByIdAsync(id);
         }
     }
 }

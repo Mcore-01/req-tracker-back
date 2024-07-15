@@ -22,8 +22,6 @@ namespace req_tracker_back.Data
         }
 
         public DbSet<Ticket> Tickets { get; set; }
-        public DbSet<User> Users { get; set; }
         public DbSet<Status> Status { get; set; }
-
     }
 }

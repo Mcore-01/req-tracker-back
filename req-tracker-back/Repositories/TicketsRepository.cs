@@ -16,15 +16,11 @@ namespace req_tracker_back.Repositories
             {
                 string filterToLower = filter.ToLower();
                 query = query
-                    .Where(req => req.Observer.Nickname.ToLower().Contains(filterToLower)
-                    || req.Executor.Nickname.ToLower().Contains(filterToLower)
-                    || req.Status.Name.ToLower().Contains(filterToLower)
+                    .Where(req => req.Status.Name.ToLower().Contains(filterToLower)
                     || req.Text.ToLower().Contains(filterToLower));
             }
 
-            query = query.Include(p => p.Status)
-                    .Include(p => p.Observer)
-                    .Include(p => p.Executor);
+            query = query.Include(p => p.Status);
 
             return query.OrderBy(p => p.Id).ToList();
         }
@@ -34,8 +30,6 @@ namespace req_tracker_back.Repositories
             try
             {
                 return _context.Tickets.Include(p => p.Status)
-                    .Include(p => p.Observer)
-                    .Include(p => p.Executor)
                     .First(req => req.Id == id);                    
             }
             catch

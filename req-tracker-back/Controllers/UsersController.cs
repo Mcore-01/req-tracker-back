@@ -23,19 +23,5 @@ namespace req_tracker_back.Controllers
                 return BadRequest(new { error = e.Message });
             }
         }
-
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
-        {
-            try
-            {
-                var userDTO = await _userService.Login(loginRequest.Login, loginRequest.Password);
-                return Ok(userDTO);
-            }
-            catch (Exception e)
-            {
-                return BadRequest(new { Message = e.Message });
-            }
-        }
     }
 }

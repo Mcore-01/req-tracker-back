@@ -4,9 +4,10 @@ using req_tracker_back.ViewModels;
 
 namespace req_tracker_back.Services
 {
-    public class TicketsService(TicketsRepository repository)
+    public class TicketsService(TicketsRepository repository, UsersRepository usersRepository)
     {
         private readonly TicketsRepository _repository = repository;
+        private readonly UsersRepository _usersRepository = usersRepository;
 
         public IEnumerable<TicketDTO> GetAll(string? filter)
         {
@@ -23,8 +24,8 @@ namespace req_tracker_back.Services
             var request = new Ticket()
             {
                 Status = new() { Id = requestDTO.Status.Id },
-                Observer = new() { Id = requestDTO.Observer.Id},
-                Executor = new() { Id = requestDTO.Executor.Id },
+                Observer = requestDTO.Observer.Id,
+                Executor = requestDTO.Executor.Id,
                 Text = requestDTO.Text,
                 IsLocked = false,
             };
@@ -37,8 +38,8 @@ namespace req_tracker_back.Services
             {
                 Id = requestDTO.Id,
                 Status = new() { Id = requestDTO.Status.Id },
-                Observer = new() { Id = requestDTO.Observer.Id },
-                Executor = new() { Id = requestDTO.Executor.Id },
+                Observer = requestDTO.Observer.Id,
+                Executor = requestDTO.Executor.Id,
                 Text = requestDTO.Text,
                 IsLocked = false,
             };
@@ -52,12 +53,15 @@ namespace req_tracker_back.Services
 
         private TicketDTO GetTicketDTO(Ticket ticket)
         {
+            var observer = _usersRepository.GetUserById(ticket.Observer).Result;
+            var executor = _usersRepository.GetUserById(ticket.Executor).Result;
+
             return new TicketDTO()
             {
                 Id = ticket.Id,
                 Status = new DisplayModel<int>() { Id = ticket.Status.Id, Name = ticket.Status.Name },
-                Observer = new DisplayModel<int>() { Id = ticket.Observer.Id, Name = ticket.Observer.Nickname },
-                Executor = new DisplayModel<int>() { Id = ticket.Executor.Id, Name = ticket.Executor.Nickname },
+                Observer = new DisplayModel<string>() { Id = observer.Id, Name = observer.FullName },
+                Executor = new DisplayModel<string>() { Id = executor.Id, Name = executor.FullName },
                 Text = ticket.Text,
                 IsLocked = ticket.IsLocked
             };
