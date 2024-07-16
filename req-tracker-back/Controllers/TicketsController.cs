@@ -40,11 +40,11 @@ namespace req_tracker_back.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody]TicketDTO request)
+        public IActionResult Create([FromBody] CreateTicketDTO ticketDTO)
         {
             try
             {
-                int id = _service.Create(request);
+                int id = _service.Create(ticketDTO.observerId);
                 return Ok(new { id = id });
             }
             catch (Exception e)

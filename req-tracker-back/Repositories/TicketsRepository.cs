@@ -63,5 +63,10 @@ namespace req_tracker_back.Repositories
         {
             return _context.Status;
         }
+
+        public Status GetCreateStatus() 
+        {
+            return _context.Status.First(p => p.Name == "Создана");
+        }
     }
 }

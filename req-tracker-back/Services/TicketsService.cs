@@ -1,6 +1,8 @@
 ﻿using req_tracker_back.Models;
 using req_tracker_back.Repositories;
+using req_tracker_back.ResponseModels;
 using req_tracker_back.ViewModels;
+using System.Net.Sockets;
 
 namespace req_tracker_back.Services
 {
@@ -11,22 +13,38 @@ namespace req_tracker_back.Services
 
         public IEnumerable<TicketDTO> GetAll(string? filter)
         {
-            return _repository.GetAll(filter).Select(GetTicketDTO);
+            var users = _usersRepository.GetAll().Result;
+            return _repository.GetAll(filter).Select(ticket =>
+            {
+                var observer = users.First(p => p.Id == ticket.Observer);
+                var executor = users.FirstOrDefault(p => p.Id == ticket.Executor);
+                var ticketDTO = GetTicketDTO(ticket, observer, executor);
+                return ticketDTO;
+            });
         }
 
         public TicketDTO GetById(int id)
         {
-            return GetTicketDTO(_repository.GetById(id));
+            var ticket = _repository.GetById(id);
+            var observer = _usersRepository.GetUserById(ticket.Observer).Result;
+
+            UserResponse? executor = null;
+            if (ticket.Executor is not null)
+            {
+                executor = _usersRepository.GetUserById(ticket.Executor).Result;
+            }
+
+            var ticketDTO = GetTicketDTO(ticket, observer, executor);
+            return ticketDTO;
         }
 
-        public int Create(TicketDTO requestDTO)
+        public int Create(string observerID)
         {
+            var status = _repository.GetCreateStatus();
             var request = new Ticket()
             {
-                Status = new() { Id = requestDTO.Status.Id },
-                Observer = requestDTO.Observer.Id,
-                Executor = requestDTO.Executor.Id,
-                Text = requestDTO.Text,
+                Status = status,
+                Observer = observerID,
                 IsLocked = false,
             };
             return _repository.Create(request);
@@ -51,17 +69,21 @@ namespace req_tracker_back.Services
             _repository.Delete(ticketID);
         }
 
-        private TicketDTO GetTicketDTO(Ticket ticket)
+        private TicketDTO GetTicketDTO(Ticket ticket, UserResponse observer, UserResponse? executor)
         {
-            var observer = _usersRepository.GetUserById(ticket.Observer).Result;
-            var executor = _usersRepository.GetUserById(ticket.Executor).Result;
+            DisplayModel<string>? executorDTO = null;
+
+            if (ticket.Executor is not null)
+            {
+                executorDTO = new DisplayModel<string>() { Id = executor.Id, Name = executor.FullName };
+            }
 
             return new TicketDTO()
             {
                 Id = ticket.Id,
                 Status = new DisplayModel<int>() { Id = ticket.Status.Id, Name = ticket.Status.Name },
                 Observer = new DisplayModel<string>() { Id = observer.Id, Name = observer.FullName },
-                Executor = new DisplayModel<string>() { Id = executor.Id, Name = executor.FullName },
+                Executor = executorDTO,
                 Text = ticket.Text,
                 IsLocked = ticket.IsLocked
             };
