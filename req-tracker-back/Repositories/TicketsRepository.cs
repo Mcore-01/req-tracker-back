@@ -17,10 +17,11 @@ namespace req_tracker_back.Repositories
                 string filterToLower = filter.ToLower();
                 query = query
                     .Where(req => req.Status.Name.ToLower().Contains(filterToLower)
-                    || req.Text.ToLower().Contains(filterToLower));
+                    || req.Group.Name.ToLower().Contains(filterToLower));
             }
 
-            query = query.Include(p => p.Status);
+            query = query.Include(p => p.Status)
+                .Include(p => p.Group);
 
             return query.OrderBy(p => p.Id).ToList();
         }
@@ -30,6 +31,7 @@ namespace req_tracker_back.Repositories
             try
             {
                 return _context.Tickets.Include(p => p.Status)
+                    .Include(p => p.Group)
                     .First(req => req.Id == id);                    
             }
             catch
@@ -67,6 +69,16 @@ namespace req_tracker_back.Repositories
         public Status GetCreateStatus() 
         {
             return _context.Status.First(p => p.Name == "Создана");
+        }
+
+        public Group GetCreateGroup()
+        {
+            return _context.Groups.First(p => p.Name == "Остальные");
+        }
+
+        public IEnumerable<Group> GetAllGroups()
+        {
+            return _context.Groups;
         }
     }
 }

@@ -96,5 +96,18 @@ namespace req_tracker_back.Controllers
                 return BadRequest(new { error = e.Message });
             }
         }
+
+        [HttpGet("groups")]
+        public ActionResult<IEnumerable<Group>> GetAllGroups()
+        {
+            try
+            {
+                return Ok(_service.GetAllGroups());
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { error = e.Message });
+            }
+        }
     }
 }

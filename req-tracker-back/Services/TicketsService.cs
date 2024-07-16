@@ -2,7 +2,6 @@
 using req_tracker_back.Repositories;
 using req_tracker_back.ResponseModels;
 using req_tracker_back.ViewModels;
-using System.Net.Sockets;
 
 namespace req_tracker_back.Services
 {
@@ -41,9 +40,13 @@ namespace req_tracker_back.Services
         public int Create(string observerID)
         {
             var status = _repository.GetCreateStatus();
+            var group = _repository.GetCreateGroup();
+            var number = $"REQ-{Guid.NewGuid().ToString()}";
             var request = new Ticket()
             {
                 Status = status,
+                Number = number,
+                Group = group,
                 Observer = observerID,
                 IsLocked = false,
             };
@@ -55,10 +58,14 @@ namespace req_tracker_back.Services
             var request = new Ticket()
             {
                 Id = requestDTO.Id,
+                Number = requestDTO.Number,
                 Status = new() { Id = requestDTO.Status.Id },
+                Group = new() { Id = requestDTO.Group.Id },
                 Observer = requestDTO.Observer.Id,
                 Executor = requestDTO.Executor.Id,
                 Text = requestDTO.Text,
+                Result = requestDTO.Result,
+                Comment = requestDTO.Comment,
                 IsLocked = false,
             };
             _repository.Update(request);
@@ -81,10 +88,14 @@ namespace req_tracker_back.Services
             return new TicketDTO()
             {
                 Id = ticket.Id,
+                Number = ticket.Number,
                 Status = new DisplayModel<int>() { Id = ticket.Status.Id, Name = ticket.Status.Name },
+                Group = new DisplayModel<int>() { Id = ticket.Group.Id, Name = ticket.Group.Name },
                 Observer = new DisplayModel<string>() { Id = observer.Id, Name = observer.FullName },
                 Executor = executorDTO,
                 Text = ticket.Text,
+                Result = ticket.Result,
+                Comment = ticket.Comment,
                 IsLocked = ticket.IsLocked
             };
         }
@@ -92,6 +103,11 @@ namespace req_tracker_back.Services
         public IEnumerable<Status> GetAllStatuses()
         {
             return _repository.GetAllStatuses();
+        }
+
+        public IEnumerable<Group> GetAllGroups()
+        {
+            return _repository.GetAllGroups();
         }
     }
 }

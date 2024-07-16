@@ -19,9 +19,15 @@ namespace req_tracker_back.Data
                 new Status() { Id = 2, Name = "В работе" }, 
                 new Status() { Id = 3, Name = "На проверке" }, 
                 new Status() { Id = 4, Name = "Завершена" });
+
+            modelBuilder.Entity<Group>().HasData(
+                new Group() { Id = 1, Name = "Остальные" },
+                new Group() { Id = 2, Name = "Внешние" },
+                new Group() { Id = 3, Name = "Внутренние" });
         }
 
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<Status> Status { get; set; }
+        public DbSet<Group> Groups { get; set; }
     }
 }
